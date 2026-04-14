@@ -1,213 +1,605 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Caso Frodo: Investigação Digital</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CASO FRODO - Terminal de Investigação</title>
     <style>
-        body { 
-            font-family: 'Courier New', monospace; 
-            background: #1a1a1a; 
-            color: #d4d4d4; 
-            padding: 20px; 
+        /* RESET E VARIÁVEIS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .container {
-            max-width: 800px; 
-            margin: auto; 
-            border: 2px solid #333; 
-            padding: 20px; 
-            background: #252525; 
+
+        :root {
+            --bg-color: #0d0d0d;
+            --panel-bg: #1a1a1a;
+            --text-main: #00ff00;
+            --text-muted: #888888;
+            --border-color: #333333;
+            --danger-color: #ff3333;
+            --highlight: #00cc00;
+            --font-main: 'Courier New', Courier, monospace;
         }
-        h1 { 
-            color: #e74c3c; 
-            border-bottom: 1px solid #e74c3c; 
-            padding-bottom: 10px;
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
-        .card-container {
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 10px; 
-            margin-top: 20px; 
+
+        /* HEADER */
+        header {
+            border-bottom: 2px solid var(--border-color);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--panel-bg);
+            flex-shrink: 0;
         }
-        .card { 
-            border: 1px solid #444; 
-            padding: 15px; 
-            background: #333; 
-            cursor: pointer; 
-            transition: 0.3s; 
-            text-align: center;
+
+        .header-info {
+            max-width: 70%;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        #briefing {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        #clock-container {
+            text-align: right;
+            border: 1px solid var(--text-main);
+            padding: 10px 20px;
+            border-radius: 4px;
+            background: #000;
+        }
+
+        #clock {
+            font-size: 2.5rem;
             font-weight: bold;
         }
-        .card:hover { 
-            background: #444; 
-            border-color: #e74c3c; 
+
+        .danger-time {
+            color: var(--danger-color) !important;
+            border-color: var(--danger-color) !important;
+            animation: pulse 1s infinite;
         }
-        #status-bar { 
-            display: flex; 
-            justify-content: space-between; 
-            margin-bottom: 20px; 
-            color: #f1c40f; 
-            font-size: 1.2em;
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
         }
-        button { 
-            background: #e74c3c; 
-            border: none; 
-            color: white; 
-            padding: 15px; 
-            cursor: pointer; 
-            width: 100%; 
-            margin-top: 10px; 
-            font-weight: bold;
-            font-size: 1.1em;
-        }
-        button:hover {
-            background: #c0392b;
-        }
-        #painel-evidencias {
-            margin-top: 20px;
+
+        /* MAIN LAYOUT (3 PAINÉIS) */
+        main {
+            display: grid;
+            grid-template-columns: 250px 1fr 300px;
+            gap: 15px;
             padding: 15px;
-            background: #111;
-            border: 1px dashed #555;
-            min-height: 100px;
+            flex-grow: 1;
+            overflow: hidden;
         }
-        .evidencia-log {
-            color: #2ecc71;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #333;
-            padding-bottom: 5px;
+
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            background-color: #222;
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: bold;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .panel-content {
+            padding: 15px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        /* SCROLLBAR CUSTOMIZADO */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        /* PAINEL 1: GRID DE INVESTIGAÇÃO */
+        #grid-investigacao {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .card-no {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #111;
+            text-align: center;
+        }
+
+        .card-no:hover {
+            border-color: var(--text-main);
+            background: #222;
+        }
+
+        .card-no img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border: 1px solid #333;
+            margin-bottom: 5px;
+            filter: grayscale(100%) contrast(120%);
+        }
+
+        .card-no h3 {
+            font-size: 0.9rem;
+            color: #fff;
+        }
+
+        .tipo-badge {
+            font-size: 0.7rem;
+            padding: 2px 5px;
+            background: #333;
+            color: var(--text-main);
+            border-radius: 3px;
+            display: inline-block;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+
+        /* PAINEL 2: MESA DE AÇÕES */
+        #mesa-acoes {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .empty-desk {
+            color: var(--text-muted);
+            margin-top: 50px;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .desk-profile {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .desk-profile img {
+            width: 100%;
+            border: 2px solid var(--text-main);
+            filter: grayscale(80%);
+        }
+
+        .image-caption {
+            display: block;
+            background: #000;
+            color: var(--text-muted);
+            padding: 8px;
+            font-size: 0.85rem;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            text-align: left;
+            font-style: italic;
+        }
+
+        .desk-profile h2 {
+            margin-top: 15px;
+            font-size: 1.5rem;
+            color: #fff;
+        }
+
+        .action-list {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-action {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--text-main);
+            padding: 12px;
+            font-family: var(--font-main);
+            font-size: 1rem;
+            cursor: pointer;
+            text-align: left;
+            transition: 0.2s;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn-action:hover:not(:disabled) {
+            background: var(--text-main);
+            color: #000;
+        }
+
+        .btn-action:disabled {
+            border-color: var(--border-color);
+            color: var(--border-color);
+            cursor: not-allowed;
+        }
+
+        .btn-action .cost {
+            font-weight: bold;
+        }
+
+        /* PAINEL 3: LOG DE PISTAS */
+        #painel-pistas {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .log-entry {
+            background: #000;
+            border-left: 3px solid var(--text-main);
+            padding: 10px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            color: #ccc;
+        }
+
+        .log-entry.system {
+            border-left-color: var(--text-muted);
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* BOTÃO E MODAL DE ACUSAÇÃO */
+        #btn-acusacao-wrapper {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+        }
+
+        #btn-acusar-final {
+            background: var(--danger-color);
+            color: #fff;
+            border: 2px solid #fff;
+            padding: 15px 30px;
+            font-family: var(--font-main);
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.4);
+            transition: 0.2s;
+        }
+
+        #btn-acusar-final:hover {
+            background: #cc0000;
+            transform: scale(1.05);
+        }
+
+        dialog {
+            margin: auto;
+            background: #111;
+            border: 2px solid var(--text-main);
+            color: var(--text-main);
+            padding: 25px;
+            width: 400px;
+            font-family: var(--font-main);
+        }
+
+        dialog::backdrop {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        dialog h2 {
+            color: var(--danger-color);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        dialog select {
+            width: 100%;
+            padding: 10px;
+            background: #000;
+            color: var(--text-main);
+            border: 1px solid var(--text-main);
+            font-family: var(--font-main);
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .modal-buttons button {
+            padding: 10px 20px;
+            font-family: var(--font-main);
+            font-weight: bold;
+            cursor: pointer;
+            border: 1px solid var(--text-main);
+            background: transparent;
+            color: var(--text-main);
+        }
+
+        .modal-buttons button:hover {
+            background: var(--text-main);
+            color: #000;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>ARQUIVO: CASO PROF. FRODO</h1>
-        
-        <div id="status-bar">
-            <span>Tempo Decorrido: <b id="time">0</b>/48h</span>
-            <span>Prestígio: <b id="prestige">100</b></span>
-        </div>
 
-        <div id="narrativa">
-            <p>O monitor Joseilson encontrou o corpo do professor Frodo na sala da coordenação. Uma faca está cravada no peito. O semblante é sereno e não há sinais de luta.</p>
+    <header>
+        <div class="header-info">
+            <h1>Caso Frodo</h1>
+            <p id="briefing">Carregando dados do servidor da polícia...</p>
         </div>
-
-        <h3>Ações de Investigação</h3>
-        <div class="card-container" id="actions">
-            <div class="card" onclick="investigar('cameras', 3)">Analisar Câmeras (3h)</div>
-            <div class="card" onclick="investigar('banco', 4)">Extratos Bancários (4h)</div>
-            <div class="card" onclick="investigar('necropsia', 6)">Relatório do Legista (6h)</div>
-            <div class="card" onclick="investigar('interrogar', 2)">Falar com Pamella (2h)</div>
+        <div id="clock-container">
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px;">TEMPO RESTANTE</div>
+            <div id="clock">--h</div>
         </div>
+    </header>
 
-        <h3>Bloco de Notas do Detetive</h3>
-        <div id="painel-evidencias">
-            <p style="color: #777;"><i>Nenhuma evidência coletada ainda...</i></p>
-        </div>
+    <main>
+        <section class="panel">
+            <div class="panel-header">SUJEITOS / LOCAIS</div>
+            <div class="panel-content" id="grid-investigacao">
+                </div>
+        </section>
 
-        <h3>Efetuar Acusação Final</h3>
-        <p style="font-size: 0.9em; color: #aaa;">Atenção: Acusar a pessoa errada gerará tensão e você perderá prestígio!</p>
-        <select id="suspeitoSelect" style="width: 100%; padding: 10px; margin-top: 10px; background: #333; color: white; border: 1px solid #555;">
-            <option value="" disabled selected>Selecione um suspeito...</option>
-        </select>
-        <button onclick="finalizarCaso()">ACUSAR SUSPEITO</button>
+        <section class="panel">
+            <div class="panel-header">MESA DE INVESTIGAÇÃO</div>
+            <div class="panel-content" id="mesa-acoes">
+                <div class="empty-desk">Selecione um arquivo no painel lateral para iniciar a investigação detalhada.</div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-header">REGISTRO DE PISTAS</div>
+            <div class="panel-content" id="painel-pistas">
+                <div class="log-entry system">Sistema inicializado. Aguardando comandos do investigador...</div>
+            </div>
+        </section>
+    </main>
+
+    <div id="btn-acusacao-wrapper">
+        <button id="btn-acusar-final" onclick="abrirModalAcusacao()">ACUSAÇÃO FINAL</button>
     </div>
+
+    <dialog id="modal-acusacao">
+        <h2>EMITIR MANDADO DE PRISÃO</h2>
+        <p style="margin-bottom: 15px; font-size: 0.9rem; color: #ccc;">Selecione o principal suspeito. Se você errar, o caso será arquivado.</p>
+        <select id="select-suspeitos">
+            </select>
+        <div class="modal-buttons">
+            <button onclick="fecharModalAcusacao()">CANCELAR</button>
+            <button onclick="confirmarAcusacao()" style="color: var(--danger-color); border-color: var(--danger-color);">PRENDER</button>
+        </div>
+    </dialog>
 
     <script>
         const API_URL = 'http://localhost:3000';
-        let tempo = 0;
-        let prestigio = 100;
-        let investigacoesFeitas = [];
+        
+        // Estado da aplicação
+        let estadoNos = [];
+        let tempoAtual = 48;
+        let noSelecionadoId = null;
 
-        // Carrega a lista do banco de dados na inicialização
-        async function carregarSuspeitos() {
+        // ELEMENTOS DOM
+        const elBriefing = document.getElementById('briefing');
+        const elClock = document.getElementById('clock');
+        const elGrid = document.getElementById('grid-investigacao');
+        const elMesa = document.getElementById('mesa-acoes');
+        const elLog = document.getElementById('painel-pistas');
+        const modalAcusacao = document.getElementById('modal-acusacao');
+        const selectSuspeitos = document.getElementById('select-suspeitos');
+
+        // INICIALIZAÇÃO
+        window.addEventListener('DOMContentLoaded', iniciarJogo);
+
+        async function iniciarJogo() {
             try {
-                const resp = await fetch(`${API_URL}/suspeitos`);
-                const dados = await resp.json();
-                const select = document.getElementById('suspeitoSelect');
-                dados.forEach(s => {
-                    select.innerHTML += `<option value="${s.id}">${s.nome} (${s.relacao})</option>`;
-                });
+                const response = await fetch(`${API_URL}/start`);
+                if (!response.ok) throw new Error('Erro ao conectar com o servidor da polícia.');
+                
+                const data = await response.json();
+                
+                elBriefing.innerText = data.introducao;
+                estadoNos = data.nos;
+                atualizarRelogio(data.tempoRestante);
+                renderizarGrid();
+                
             } catch (error) {
-                console.error("Erro ao carregar suspeitos. O servidor está rodando?", error);
-                alert("Erro de conexão com o banco de dados. Verifique se o server.js está rodando.");
+                console.error(error);
+                elBriefing.innerText = "ERRO DE CONEXÃO: Certifique-se de que o backend (server.js) está rodando em localhost:3000.";
+                elBriefing.style.color = "red";
             }
         }
 
-        // Lógica das cartas de ação
-        async function investigar(tipo, horasGastas) {
-            if (investigacoesFeitas.includes(tipo)) {
-                alert("Você já investigou isso! Não perca tempo.");
-                return;
-            }
-
-            // Atualiza tempo e prestígio
-            tempo += horasGastas;
-            document.getElementById('time').innerText = tempo;
+        // ATUALIZA RELÓGIO
+        function atualizarRelogio(tempo) {
+            tempoAtual = tempo;
+            elClock.innerText = `${tempo.toString().padStart(2, '0')}h`;
             
-            if (tempo > 48) {
-                prestigio -= 15;
-                document.getElementById('prestige').innerText = prestigio;
-                alert("O tempo de 48h estourou! A pressão da mídia está caindo sobre você. Prestígio reduzido.");
+            if (tempo <= 10) {
+                elClock.classList.add('danger-time');
+            } else {
+                elClock.classList.remove('danger-time');
             }
 
-            investigacoesFeitas.push(tipo);
-
-            // Simula a descoberta de pistas com base no banco de dados que criamos
-            let descoberta = "";
-            if (tipo === 'cameras') {
-                descoberta = "O Melhor Amigo sai da sala às 23:10. O Porteiro entra na sala às 23:30 com as mãos nos bolsos.";
-            } else if (tipo === 'banco') {
-                descoberta = "CEO enviou R$70k para uma conta offshore 'SGH Global'. O Porteiro recebeu R$70k em espécie ontem e comprou uma passagem só de ida para o Paraguai.";
-            } else if (tipo === 'necropsia') {
-                descoberta = "Exame toxicológico detectou sedativos pesados. O professor não reagiu. O ângulo da facada indica alguém de altura diferente do Melhor Amigo.";
-            } else if (tipo === 'interrogar') {
-                descoberta = "Pamella jura que assistia Netflix até 00:30, mas parece esconder algo. Descobrimos que ela instalou um rastreador no carro do marido.";
+            if (tempo <= 0) {
+                adicionarLog("O PRAZO ESGOTOU! Você precisa fazer a Acusação Final agora.", true);
+                if (noSelecionadoId) selecionarNo(noSelecionadoId); // Re-renderiza para bloquear botões
             }
-
-            // Atualiza o painel
-            const painel = document.getElementById('painel-evidencias');
-            if (investigacoesFeitas.length === 1) painel.innerHTML = ""; // limpa o texto inicial
-            
-            painel.innerHTML += `<div class="evidencia-log"><b>[+${horasGastas}h - ${tipo.toUpperCase()}]</b>: ${descoberta}</div>`;
         }
 
-        // Lógica de acusação
-        async function finalizarCaso() {
-            const id = document.getElementById('suspeitoSelect').value;
+        // RENDERIZA GRID LATERAL
+        function renderizarGrid() {
+            elGrid.innerHTML = '';
             
-            if (!id) {
-                alert("Selecione um suspeito antes de fazer a acusação!");
-                return;
-            }
+            estadoNos.forEach(no => {
+                const card = document.createElement('div');
+                card.className = 'card-no';
+                card.onclick = () => selecionarNo(no.id);
+                
+                card.innerHTML = `
+                    <img src="https://via.placeholder.com/150x150/222222/00FF00?text=FOTO" alt="${no.descricaoDaImagem}">
+                    <h3>${no.nome}</h3>
+                    <span class="tipo-badge">${no.tipo}</span>
+                `;
+                elGrid.appendChild(card);
+            });
+        }
 
+        // SELECIONA NÓ (MESA DE AÇÕES)
+        function selecionarNo(id) {
+            noSelecionadoId = id;
+            const no = estadoNos.find(n => n.id === id);
+            if (!no) return;
+
+            const isGameOver = tempoAtual <= 0;
+
+            let acoesHtml = no.acoes.length === 0 
+                ? `<p class="empty-desk">Nenhuma ação disponível no momento para este arquivo.</p>`
+                : no.acoes.map(acao => `
+                    <button class="btn-action" 
+                            onclick="executarAcao('${acao.idAcao}', '${no.id}')" 
+                            ${isGameOver || tempoAtual < acao.custoTempo ? 'disabled' : ''}
+                            title="${tempoAtual < acao.custoTempo ? 'Tempo insuficiente' : ''}">
+                        <span>> ${acao.titulo}</span>
+                        <span class="cost">-${acao.custoTempo}h</span>
+                    </button>
+                `).join('');
+
+            elMesa.innerHTML = `
+                <div class="desk-profile">
+                    <img src="https://via.placeholder.com/400x300/111111/00FF00?text=${no.tipo.toUpperCase()}" alt="${no.descricaoDaImagem}">
+                    <span class="image-caption">ANEXO: ${no.descricaoDaImagem}</span>
+                    <h2>${no.nome}</h2>
+                </div>
+                <div class="action-list">
+                    ${acoesHtml}
+                </div>
+            `;
+        }
+
+        // EXECUTAR AÇÃO
+        async function executarAcao(idAcao, idNo) {
             try {
-                const resp = await fetch(`${API_URL}/acusar`, {
+                const response = await fetch(`${API_URL}/action`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ suspeitoId: id })
+                    body: JSON.stringify({ idAcao, idNo })
                 });
                 
-                const resultado = await resp.json();
+                const data = await response.json();
                 
-                if (resultado.sucesso) {
-                    alert("🚨 " + resultado.mensagem + "\n\nCASO ENCERRADO! Seu prestígio final: " + prestigio);
-                    window.location.reload(); // Reinicia o jogo
-                } else {
-                    prestigio -= 20; // Penalidade por erro
-                    document.getElementById('prestige').innerText = prestigio;
-                    alert("❌ " + resultado.mensagem + "\nPerdeu 20 de prestígio.");
-                    
-                    if (prestigio <= 0) {
-                        alert("GAME OVER! Você acusou tantas pessoas erradas que foi afastado do caso.");
-                        window.location.reload();
-                    }
+                if (!response.ok) {
+                    alert(`Erro: ${data.erro}`);
+                    return;
                 }
+
+                // Atualiza Estados
+                atualizarRelogio(data.tempoRestante);
+                adicionarLog(data.textoPista);
+                estadoNos = data.nos; // Recebe a árvore atualizada
+                
+                // Re-renderiza UI
+                renderizarGrid();
+                selecionarNo(idNo); // Atualiza os botões do nó atual
+
             } catch (error) {
-                console.error("Erro ao acusar:", error);
+                console.error("Erro ao executar ação:", error);
             }
         }
 
-        // Inicia o jogo
-        carregarSuspeitos();
+        // ADICIONAR LOG
+        function adicionarLog(texto, isSystem = false) {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${isSystem ? 'system' : ''}`;
+            entry.innerText = `> ${texto}`;
+            elLog.appendChild(entry);
+            // Scroll para o fim
+            elLog.scrollTop = elLog.scrollHeight;
+        }
+
+        // MODAL E ACUSAÇÃO
+        function abrirModalAcusacao() {
+            selectSuspeitos.innerHTML = '<option value="">-- Selecione o Culpado --</option>';
+            
+            // Filtra apenas nós do tipo suspeito
+            const suspeitos = estadoNos.filter(n => n.tipo === 'suspeito');
+            suspeitos.forEach(s => {
+                const option = document.createElement('option');
+                option.value = s.id;
+                option.innerText = s.nome;
+                selectSuspeitos.appendChild(option);
+            });
+
+            modalAcusacao.showModal();
+        }
+
+        function fecharModalAcusacao() {
+            modalAcusacao.close();
+        }
+
+        async function confirmarAcusacao() {
+            const idSuspeito = selectSuspeitos.value;
+            
+            if (!idSuspeito) {
+                alert("Você precisa selecionar um suspeito.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/accuse`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idSuspeito })
+                });
+                
+                const data = await response.json();
+                
+                fecharModalAcusacao();
+                
+                if (data.sucesso) {
+                    alert(`🟢 ${data.mensagem}`);
+                } else {
+                    alert(`🔴 ${data.mensagem}`);
+                }
+                
+                // Reinicia a página após o fim
+                window.location.reload();
+
+            } catch (error) {
+                console.error("Erro ao fazer acusação:", error);
+            }
+        }
     </script>
 </body>
 </html>
