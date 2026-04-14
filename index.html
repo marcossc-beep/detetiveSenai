@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Caso Frodo: Investigação Digital</title>
+    <style>
+        body { 
+            font-family: 'Courier New', monospace; 
+            background: #1a1a1a; 
+            color: #d4d4d4; 
+            padding: 20px; 
+        }
+        .container {
+            max-width: 800px; 
+            margin: auto; 
+            border: 2px solid #333; 
+            padding: 20px; 
+            background: #252525; 
+        }
+        h1 { 
+            color: #e74c3c; 
+            border-bottom: 1px solid #e74c3c; 
+            padding-bottom: 10px;
+        }
+        .card-container {
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 10px; 
+            margin-top: 20px; 
+        }
+        .card { 
+            border: 1px solid #444; 
+            padding: 15px; 
+            background: #333; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            text-align: center;
+            font-weight: bold;
+        }
+        .card:hover { 
+            background: #444; 
+            border-color: #e74c3c; 
+        }
+        #status-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 20px; 
+            color: #f1c40f; 
+            font-size: 1.2em;
+        }
+        button { 
+            background: #e74c3c; 
+            border: none; 
+            color: white; 
+            padding: 15px; 
+            cursor: pointer; 
+            width: 100%; 
+            margin-top: 10px; 
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        button:hover {
+            background: #c0392b;
+        }
+        #painel-evidencias {
+            margin-top: 20px;
+            padding: 15px;
+            background: #111;
+            border: 1px dashed #555;
+            min-height: 100px;
+        }
+        .evidencia-log {
+            color: #2ecc71;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ARQUIVO: CASO PROF. FRODO</h1>
+        
+        <div id="status-bar">
+            <span>Tempo Decorrido: <b id="time">0</b>/48h</span>
+            <span>Prestígio: <b id="prestige">100</b></span>
+        </div>
+
+        <div id="narrativa">
+            <p>O monitor Joseilson encontrou o corpo do professor Frodo na sala da coordenação. Uma faca está cravada no peito. O semblante é sereno e não há sinais de luta.</p>
+        </div>
+
+        <h3>Ações de Investigação</h3>
+        <div class="card-container" id="actions">
+            <div class="card" onclick="investigar('cameras', 3)">Analisar Câmeras (3h)</div>
+            <div class="card" onclick="investigar('banco', 4)">Extratos Bancários (4h)</div>
+            <div class="card" onclick="investigar('necropsia', 6)">Relatório do Legista (6h)</div>
+            <div class="card" onclick="investigar('interrogar', 2)">Falar com Pamella (2h)</div>
+        </div>
+
+        <h3>Bloco de Notas do Detetive</h3>
+        <div id="painel-evidencias">
+            <p style="color: #777;"><i>Nenhuma evidência coletada ainda...</i></p>
+        </div>
+
+        <h3>Efetuar Acusação Final</h3>
+        <p style="font-size: 0.9em; color: #aaa;">Atenção: Acusar a pessoa errada gerará tensão e você perderá prestígio!</p>
+        <select id="suspeitoSelect" style="width: 100%; padding: 10px; margin-top: 10px; background: #333; color: white; border: 1px solid #555;">
+            <option value="" disabled selected>Selecione um suspeito...</option>
+        </select>
+        <button onclick="finalizarCaso()">ACUSAR SUSPEITO</button>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+        let tempo = 0;
+        let prestigio = 100;
+        let investigacoesFeitas = [];
+
+        // Carrega a lista do banco de dados na inicialização
+        async function carregarSuspeitos() {
+            try {
+                const resp = await fetch(`${API_URL}/suspeitos`);
+                const dados = await resp.json();
+                const select = document.getElementById('suspeitoSelect');
+                dados.forEach(s => {
+                    select.innerHTML += `<option value="${s.id}">${s.nome} (${s.relacao})</option>`;
+                });
+            } catch (error) {
+                console.error("Erro ao carregar suspeitos. O servidor está rodando?", error);
+                alert("Erro de conexão com o banco de dados. Verifique se o server.js está rodando.");
+            }
+        }
+
+        // Lógica das cartas de ação
+        async function investigar(tipo, horasGastas) {
+            if (investigacoesFeitas.includes(tipo)) {
+                alert("Você já investigou isso! Não perca tempo.");
+                return;
+            }
+
+            // Atualiza tempo e prestígio
+            tempo += horasGastas;
+            document.getElementById('time').innerText = tempo;
+            
+            if (tempo > 48) {
+                prestigio -= 15;
+                document.getElementById('prestige').innerText = prestigio;
+                alert("O tempo de 48h estourou! A pressão da mídia está caindo sobre você. Prestígio reduzido.");
+            }
+
+            investigacoesFeitas.push(tipo);
+
+            // Simula a descoberta de pistas com base no banco de dados que criamos
+            let descoberta = "";
+            if (tipo === 'cameras') {
+                descoberta = "O Melhor Amigo sai da sala às 23:10. O Porteiro entra na sala às 23:30 com as mãos nos bolsos.";
+            } else if (tipo === 'banco') {
+                descoberta = "CEO enviou R$70k para uma conta offshore 'SGH Global'. O Porteiro recebeu R$70k em espécie ontem e comprou uma passagem só de ida para o Paraguai.";
+            } else if (tipo === 'necropsia') {
+                descoberta = "Exame toxicológico detectou sedativos pesados. O professor não reagiu. O ângulo da facada indica alguém de altura diferente do Melhor Amigo.";
+            } else if (tipo === 'interrogar') {
+                descoberta = "Pamella jura que assistia Netflix até 00:30, mas parece esconder algo. Descobrimos que ela instalou um rastreador no carro do marido.";
+            }
+
+            // Atualiza o painel
+            const painel = document.getElementById('painel-evidencias');
+            if (investigacoesFeitas.length === 1) painel.innerHTML = ""; // limpa o texto inicial
+            
+            painel.innerHTML += `<div class="evidencia-log"><b>[+${horasGastas}h - ${tipo.toUpperCase()}]</b>: ${descoberta}</div>`;
+        }
+
+        // Lógica de acusação
+        async function finalizarCaso() {
+            const id = document.getElementById('suspeitoSelect').value;
+            
+            if (!id) {
+                alert("Selecione um suspeito antes de fazer a acusação!");
+                return;
+            }
+
+            try {
+                const resp = await fetch(`${API_URL}/acusar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ suspeitoId: id })
+                });
+                
+                const resultado = await resp.json();
+                
+                if (resultado.sucesso) {
+                    alert("🚨 " + resultado.mensagem + "\n\nCASO ENCERRADO! Seu prestígio final: " + prestigio);
+                    window.location.reload(); // Reinicia o jogo
+                } else {
+                    prestigio -= 20; // Penalidade por erro
+                    document.getElementById('prestige').innerText = prestigio;
+                    alert("❌ " + resultado.mensagem + "\nPerdeu 20 de prestígio.");
+                    
+                    if (prestigio <= 0) {
+                        alert("GAME OVER! Você acusou tantas pessoas erradas que foi afastado do caso.");
+                        window.location.reload();
+                    }
+                }
+            } catch (error) {
+                console.error("Erro ao acusar:", error);
+            }
+        }
+
+        // Inicia o jogo
+        carregarSuspeitos();
+    </script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+### Listar todos os suspeitos
+GET http://localhost:3000/suspeitos
+
+### Ver detalhes de um suspeito específico (ex: ID 3 - O Porteiro)
+GET http://localhost:3000/suspeitos/3
+
+### Ver todas as evidências coletadas
+GET http://localhost:3000/evidencias
+
+### Tentar acusar a Esposa (ID 1) - Errado
+POST http://localhost:3000/acusar
+Content-Type: application/json
+
+{
+    "suspeitoId": 1
+}
+
+### Tentar acusar o Porteiro (ID 3) - Correto
+POST http://localhost:3000/acusar
+Content-Type: application/json
+
+{
+    "suspeitoId": 3
+}
